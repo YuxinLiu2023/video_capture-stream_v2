@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <iostream>
 #include <signal.h>
 #include <pthread.h>
 #include <sys/ioctl.h>
@@ -23,6 +24,8 @@ extern "C" {
 }
 
 #include "capture.hh"
+
+using namespace std;
 
 #define CLEAR(x) memset(&(x), 0, sizeof(x))
 
@@ -257,14 +260,20 @@ void capture_streaming_loop() {
     width, height, AV_PIX_FMT_YUYV422, 
     width, height, AV_PIX_FMT_YUV420P, 
     SWS_BILINEAR, NULL, NULL, NULL);
+  
+  cerr<< "Initialized Preview and YUV420P conversion." << endl;
 
   pthread_t tid;
   pthread_create(&tid, NULL, preview_thread, NULL);
+
+  cerr << "Launched preview thread." << endl;
 
   // Start streaming on the V4L2 device
   struct pollfd pfd = { fd, POLLIN, 0 };
   int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   ioctl(fd, VIDIOC_STREAMON, &type);
+
+  cerr << "Started streaming on device: " << dev_name << endl;
 
   while (run) {
     if (low_space()){
@@ -296,6 +305,8 @@ void capture_streaming_loop() {
     memcpy(preview_rgb, prev_out_data, preview_w * preview_h * 2);
     pthread_mutex_unlock(&preview_mtx);
 
+    cerr << "Captured frame: " << buf.index << ", size: " << buf.bytesused << endl;
+
     // YUV420P conversion
     memcpy(ff_in_data, data, ff_in_linesize * height);
     const uint8_t *src_planes[1] = { ff_in_data };
@@ -326,6 +337,8 @@ void capture_streaming_loop() {
       frame_ring_head = (frame_ring_head + 1) % FRAME_RING_SIZE;
       pthread_cond_signal(&frame_available);
       pthread_mutex_unlock(&frame_ring_mutex);
+
+      cerr << "Stored frame in ring buffer at index: " << frame_ring_head << endl;
     }
     pthread_mutex_unlock(&frame_ring[frame_ring_head].lock);
 

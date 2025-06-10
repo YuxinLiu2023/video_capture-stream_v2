@@ -317,6 +317,7 @@ int main(int argc, char * argv[])
     frame_ring[i].ready = false;
     pthread_mutex_init(&frame_ring[i].lock, nullptr);
   }
+  cerr << "Initialized shared frame ring buffer with size: " << FRAME_RING_SIZE << endl;
 
   // ===== Launch capture thread =====
   pthread_t cap_tid;
@@ -324,6 +325,7 @@ int main(int argc, char * argv[])
     capture_streaming_loop();
     return nullptr;
   }, nullptr);
+  cerr << "Launched capture thread." << endl;
 
   const auto port = narrow_cast<uint16_t>(strict_stoi(argv[optind]));
   const string y4m_path = argv[optind + 1];
