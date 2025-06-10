@@ -100,14 +100,15 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_video_receiver_OBJECTS = video_receiver.$(OBJEXT) \
-	protocol.$(OBJEXT) decoder.$(OBJEXT)
+	protocol.$(OBJEXT) decoder.$(OBJEXT) capture.$(OBJEXT)
 video_receiver_OBJECTS = $(am_video_receiver_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = ../video/libvideo.a ../util/libutil.a \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 video_receiver_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_video_sender_OBJECTS = video_sender.$(OBJEXT) protocol.$(OBJEXT) \
-	encoder.$(OBJEXT)
+	encoder.$(OBJEXT) capture.$(OBJEXT)
 video_sender_OBJECTS = $(am_video_sender_OBJECTS)
 video_sender_DEPENDENCIES = $(am__DEPENDENCIES_2)
 AM_V_P = $(am__v_P_$(V))
@@ -125,9 +126,9 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I. -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/decoder.Po ./$(DEPDIR)/encoder.Po \
-	./$(DEPDIR)/protocol.Po ./$(DEPDIR)/video_receiver.Po \
-	./$(DEPDIR)/video_sender.Po
+am__depfiles_remade = ./$(DEPDIR)/capture.Po ./$(DEPDIR)/decoder.Po \
+	./$(DEPDIR)/encoder.Po ./$(DEPDIR)/protocol.Po \
+	./$(DEPDIR)/video_receiver.Po ./$(DEPDIR)/video_sender.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -180,12 +181,12 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/depcomp
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} '/home/xlab/Desktop/guest/yuxin/ringmaster/missing' aclocal-1.16
+ACLOCAL = ${SHELL} '/home/xlab/Desktop/guest/yuxin/video_capture-stream_v2/missing' aclocal-1.16
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 1
-AUTOCONF = ${SHELL} '/home/xlab/Desktop/guest/yuxin/ringmaster/missing' autoconf
-AUTOHEADER = ${SHELL} '/home/xlab/Desktop/guest/yuxin/ringmaster/missing' autoheader
-AUTOMAKE = ${SHELL} '/home/xlab/Desktop/guest/yuxin/ringmaster/missing' automake-1.16
+AUTOCONF = ${SHELL} '/home/xlab/Desktop/guest/yuxin/video_capture-stream_v2/missing' autoconf
+AUTOHEADER = ${SHELL} '/home/xlab/Desktop/guest/yuxin/video_capture-stream_v2/missing' autoheader
+AUTOMAKE = ${SHELL} '/home/xlab/Desktop/guest/yuxin/video_capture-stream_v2/missing' automake-1.16
 AWK = mawk
 CPPFLAGS = 
 CSCOPE = cscope
@@ -211,7 +212,7 @@ LDFLAGS =
 LIBOBJS = 
 LIBS = 
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} '/home/xlab/Desktop/guest/yuxin/ringmaster/missing' makeinfo
+MAKEINFO = ${SHELL} '/home/xlab/Desktop/guest/yuxin/video_capture-stream_v2/missing' makeinfo
 MKDIR_P = /usr/bin/mkdir -p
 OBJEXT = o
 PACKAGE = ringmaster
@@ -235,10 +236,12 @@ STRIP =
 VERSION = 1.0
 VPX_CFLAGS = 
 VPX_LIBS = -lvpx -lm
-abs_builddir = /home/xlab/Desktop/guest/yuxin/ringmaster/src/app
-abs_srcdir = /home/xlab/Desktop/guest/yuxin/ringmaster/src/app
-abs_top_builddir = /home/xlab/Desktop/guest/yuxin/ringmaster
-abs_top_srcdir = /home/xlab/Desktop/guest/yuxin/ringmaster
+FFMPEG_CFLAGS = $(shell pkg-config --cflags libavutil libswscale)
+FFMPEG_LIBS = $(shell pkg-config --libs libavutil libswscale)
+abs_builddir = /home/xlab/Desktop/guest/yuxin/video_capture-stream_v2/src/app
+abs_srcdir = /home/xlab/Desktop/guest/yuxin/video_capture-stream_v2/src/app
+abs_top_builddir = /home/xlab/Desktop/guest/yuxin/video_capture-stream_v2
+abs_top_srcdir = /home/xlab/Desktop/guest/yuxin/video_capture-stream_v2
 ac_ct_CXX = g++
 am__include = include
 am__leading_dot = .
@@ -257,7 +260,7 @@ host_alias =
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/xlab/Desktop/guest/yuxin/ringmaster/install-sh
+install_sh = ${SHELL} /home/xlab/Desktop/guest/yuxin/video_capture-stream_v2/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -279,16 +282,16 @@ top_build_prefix = ../../
 top_builddir = ../..
 top_srcdir = ../..
 AM_CPPFLAGS = $(CXX17_FLAGS) -I$(srcdir)/../util -I$(srcdir)/../video
-AM_CXXFLAGS = $(PICKY_CXXFLAGS)
+AM_CXXFLAGS = $(PICKY_CXXFLAGS) $(FFMPEG_CFLAGS)
 BASE_LDADD = ../video/libvideo.a ../util/libutil.a \
-	$(VPX_LIBS) $(SDL_LIBS) -lpthread
+	$(FFMPEG_LIBS) $(VPX_LIBS) $(SDL_LIBS) -lpthread
 
 video_sender_SOURCES = video_sender.cc \
-	protocol.hh protocol.cc encoder.hh encoder.cc
+	protocol.hh protocol.cc encoder.hh encoder.cc capture.hh capture.cc
 
 video_sender_LDADD = $(BASE_LDADD)
 video_receiver_SOURCES = video_receiver.cc \
-	protocol.hh protocol.cc decoder.hh decoder.cc
+	protocol.hh protocol.cc decoder.hh decoder.cc capture.hh capture.cc
 
 video_receiver_LDADD = $(BASE_LDADD)
 all: all-am
@@ -381,6 +384,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ./$(DEPDIR)/capture.Po # am--include-marker
 include ./$(DEPDIR)/decoder.Po # am--include-marker
 include ./$(DEPDIR)/encoder.Po # am--include-marker
 include ./$(DEPDIR)/protocol.Po # am--include-marker
@@ -535,7 +539,8 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/decoder.Po
+		-rm -f ./$(DEPDIR)/capture.Po
+	-rm -f ./$(DEPDIR)/decoder.Po
 	-rm -f ./$(DEPDIR)/encoder.Po
 	-rm -f ./$(DEPDIR)/protocol.Po
 	-rm -f ./$(DEPDIR)/video_receiver.Po
@@ -585,7 +590,8 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/decoder.Po
+		-rm -f ./$(DEPDIR)/capture.Po
+	-rm -f ./$(DEPDIR)/decoder.Po
 	-rm -f ./$(DEPDIR)/encoder.Po
 	-rm -f ./$(DEPDIR)/protocol.Po
 	-rm -f ./$(DEPDIR)/video_receiver.Po

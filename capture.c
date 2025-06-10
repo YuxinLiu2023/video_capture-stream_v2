@@ -14,6 +14,7 @@
 #include <time.h>             // for time(), localtime(), strftime()
 #include <linux/videodev2.h>  // for V4L2 definitions (v4l2_format, v4l2_buffer, etc.)
 #include <SDL2/SDL.h>         // for SDL video preview (window, renderer, texture)
+
 #include <libavutil/imgutils.h> // for av_image_get_buffer_size
 #include <libavutil/pixfmt.h>   // for AVPixelFormat constants
 #include <libavutil/avutil.h>   // for av_malloc, av_free
