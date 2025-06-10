@@ -104,8 +104,7 @@ am_video_receiver_OBJECTS = video_receiver.$(OBJEXT) \
 video_receiver_OBJECTS = $(am_video_receiver_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = ../video/libvideo.a ../util/libutil.a \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 video_receiver_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_video_sender_OBJECTS = video_sender.$(OBJEXT) protocol.$(OBJEXT) \
 	encoder.$(OBJEXT) capture.$(OBJEXT)
@@ -236,8 +235,6 @@ STRIP =
 VERSION = 1.0
 VPX_CFLAGS = 
 VPX_LIBS = -lvpx -lm
-FFMPEG_CFLAGS = $(shell pkg-config --cflags libavutil libswscale)
-FFMPEG_LIBS = $(shell pkg-config --libs libavutil libswscale)
 abs_builddir = /home/xlab/Desktop/guest/yuxin/video_capture-stream_v2/src/app
 abs_srcdir = /home/xlab/Desktop/guest/yuxin/video_capture-stream_v2/src/app
 abs_top_builddir = /home/xlab/Desktop/guest/yuxin/video_capture-stream_v2
@@ -282,9 +279,9 @@ top_build_prefix = ../../
 top_builddir = ../..
 top_srcdir = ../..
 AM_CPPFLAGS = $(CXX17_FLAGS) -I$(srcdir)/../util -I$(srcdir)/../video
-AM_CXXFLAGS = $(PICKY_CXXFLAGS) $(FFMPEG_CFLAGS)
+AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 BASE_LDADD = ../video/libvideo.a ../util/libutil.a \
-	$(FFMPEG_LIBS) $(VPX_LIBS) $(SDL_LIBS) -lpthread
+	$(VPX_LIBS) $(SDL_LIBS) -lpthread -lavutil -lswscale
 
 video_sender_SOURCES = video_sender.cc \
 	protocol.hh protocol.cc encoder.hh encoder.cc capture.hh capture.cc

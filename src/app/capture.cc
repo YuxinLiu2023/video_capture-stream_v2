@@ -13,10 +13,13 @@
 #include <time.h>
 #include <linux/videodev2.h>
 #include <SDL2/SDL.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/pixfmt.h>
-#include <libavutil/avutil.h>
-#include <libswscale/swscale.h>
+
+extern "C" {
+  #include "libavutil/imgutils.h"
+  #include "libavutil/pixfmt.h"
+  #include "libavutil/avutil.h"
+  #include "libswscale/swscale.h"
+}
 
 #include "capture.hh"
 

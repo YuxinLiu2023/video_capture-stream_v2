@@ -1,10 +1,7 @@
 AM_CPPFLAGS = $(CXX17_FLAGS) -I$(srcdir)/../util -I$(srcdir)/../video
-FFMPEG_CFLAGS = $(shell pkg-config --cflags libavutil libswscale)
-FFMPEG_LIBS = $(shell pkg-config --libs libavutil libswscale)
-AM_CXXFLAGS = $(PICKY_CXXFLAGS) $(FFMPEG_CFLAGS)
+AM_CXXFLAGS = $(PICKY_CXXFLAGS)
 BASE_LDADD = ../video/libvideo.a ../util/libutil.a \
-	$(FFMPEG_LIBS) $(VPX_LIBS) $(SDL_LIBS) -lpthread
-
+	$(VPX_LIBS) $(SDL_LIBS) -lpthread -lavutil -lswscale
 
 bin_PROGRAMS = video_sender video_receiver
 
