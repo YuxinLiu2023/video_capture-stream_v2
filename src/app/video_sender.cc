@@ -14,6 +14,7 @@
 #include "protocol.hh"
 #include "encoder.hh"
 #include "timestamp.hh"
+#include "capture.hh"
 
 using namespace std;
 using namespace chrono;
@@ -51,6 +52,7 @@ pair<Address, ConfigMsg> recv_config_msg(UDPSocket & udp_sock)
     }
   }
 }
+
 
 // ************************** Raw Main ***********************************
 // int main(int argc, char * argv[])
@@ -265,6 +267,7 @@ pair<Address, ConfigMsg> recv_config_msg(UDPSocket & udp_sock)
 //   return EXIT_SUCCESS;
 // }
 
+
 // ************************** Main: get frames from buffer ***********************************
 int main(int argc, char * argv[])
 {
@@ -305,6 +308,22 @@ int main(int argc, char * argv[])
     print_usage(argv[0]);
     return EXIT_FAILURE;
   }
+
+  // ===== Initialize shared ring buffer =====
+  yuv_frame_size = width * height * 3 / 2;
+  for (int i = 0; i < FRAME_RING_SIZE; ++i) {
+    frame_ring[i].data = (uint8_t *)malloc(yuv_frame_size);
+    frame_ring[i].size = 0;
+    frame_ring[i].ready = false;
+    pthread_mutex_init(&frame_ring[i].lock, nullptr);
+  }
+
+  // ===== Launch capture thread =====
+  pthread_t cap_tid;
+  pthread_create(&cap_tid, nullptr, [](void *) -> void * {
+    capture_streaming_loop();
+    return nullptr;
+  }, nullptr);
 
   const auto port = narrow_cast<uint16_t>(strict_stoi(argv[optind]));
   const string y4m_path = argv[optind + 1];

@@ -258,7 +258,7 @@ video_sender.o: video_sender.cc /usr/include/stdc-predef.h \
  /usr/include/c++/11/map /usr/include/c++/11/bits/stl_tree.h \
  /usr/include/c++/11/bits/stl_map.h \
  /usr/include/c++/11/bits/stl_multimap.h ../util/exception.hh \
- ../video/image.hh ../util/timestamp.hh
+ ../video/image.hh ../util/timestamp.hh capture.hh
 /usr/include/stdc-predef.h:
 /usr/include/getopt.h:
 /usr/include/features.h:
@@ -598,3 +598,4 @@ encoder.hh:
 ../util/exception.hh:
 ../video/image.hh:
 ../util/timestamp.hh:
+capture.hh:

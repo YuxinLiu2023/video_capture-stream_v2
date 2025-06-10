@@ -23,8 +23,12 @@ capture.o: capture.cc /usr/include/stdc-predef.h /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/floatn.h \
  /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
  /usr/include/x86_64-linux-gnu/bits/stdio.h \
- /usr/include/x86_64-linux-gnu/bits/stdio2.h /usr/include/c++/11/stdlib.h \
- /usr/include/c++/11/cstdlib \
+ /usr/include/x86_64-linux-gnu/bits/stdio2.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+ /usr/include/c++/11/stdlib.h /usr/include/c++/11/cstdlib \
  /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/cpu_defines.h \
@@ -37,8 +41,7 @@ capture.o: capture.cc /usr/include/stdc-predef.h /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
- /usr/include/x86_64-linux-gnu/bits/stdint-intn.h /usr/include/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/types/timer_t.h /usr/include/endian.h \
  /usr/include/x86_64-linux-gnu/bits/endian.h \
  /usr/include/x86_64-linux-gnu/bits/endianness.h \
  /usr/include/x86_64-linux-gnu/bits/byteswap.h \
@@ -145,14 +148,11 @@ capture.o: capture.cc /usr/include/stdc-predef.h /usr/include/stdio.h \
  /usr/include/x86_64-linux-gnu/SDL2/_real_SDL_config.h \
  /usr/include/SDL2/SDL_platform.h /usr/include/SDL2/begin_code.h \
  /usr/include/SDL2/close_code.h /usr/include/wchar.h \
- /usr/include/x86_64-linux-gnu/bits/wchar.h \
  /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
  /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
  /usr/include/x86_64-linux-gnu/bits/wchar2.h /usr/include/inttypes.h \
- /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h /usr/include/stdint.h \
- /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h /usr/include/ctype.h \
- /usr/include/c++/11/math.h /usr/include/c++/11/cmath \
- /usr/include/c++/11/bits/cpp_type_traits.h \
+ /usr/include/ctype.h /usr/include/c++/11/math.h \
+ /usr/include/c++/11/cmath /usr/include/c++/11/bits/cpp_type_traits.h \
  /usr/include/c++/11/ext/type_traits.h /usr/include/math.h \
  /usr/include/x86_64-linux-gnu/bits/math-vector.h \
  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
@@ -353,6 +353,11 @@ capture.o: capture.cc /usr/include/stdc-predef.h /usr/include/stdio.h \
 /usr/include/x86_64-linux-gnu/bits/floatn-common.h:
 /usr/include/x86_64-linux-gnu/bits/stdio.h:
 /usr/include/x86_64-linux-gnu/bits/stdio2.h:
+/usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h:
+/usr/include/stdint.h:
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
+/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
 /usr/include/c++/11/stdlib.h:
 /usr/include/c++/11/cstdlib:
 /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h:
@@ -369,7 +374,6 @@ capture.o: capture.cc /usr/include/stdc-predef.h /usr/include/stdio.h \
 /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
 /usr/include/x86_64-linux-gnu/bits/types/time_t.h:
 /usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
-/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
 /usr/include/endian.h:
 /usr/include/x86_64-linux-gnu/bits/endian.h:
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
@@ -500,14 +504,10 @@ capture.o: capture.cc /usr/include/stdc-predef.h /usr/include/stdio.h \
 /usr/include/SDL2/begin_code.h:
 /usr/include/SDL2/close_code.h:
 /usr/include/wchar.h:
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
 /usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
 /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
 /usr/include/x86_64-linux-gnu/bits/wchar2.h:
 /usr/include/inttypes.h:
-/usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h:
-/usr/include/stdint.h:
-/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
 /usr/include/ctype.h:
 /usr/include/c++/11/math.h:
 /usr/include/c++/11/cmath:

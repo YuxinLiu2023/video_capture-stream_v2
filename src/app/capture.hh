@@ -2,6 +2,7 @@
 #define CAPTURE_HH
 
 #include <stdint.h>
+#include <pthread.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,5 +30,22 @@ extern int run;
 #ifdef __cplusplus
 }
 #endif
+
+// ===== Shared ring buffer between capturing thread and streaming thread =====
+constexpr int FRAME_RING_SIZE = 100;
+
+struct YUV420PFrame {
+  uint8_t *data;
+  size_t size;
+  bool ready;
+  pthread_mutex_t lock;
+};
+
+extern YUV420PFrame frame_ring[FRAME_RING_SIZE];
+extern int frame_ring_head;
+extern int frame_ring_tail;
+extern pthread_cond_t frame_available;
+extern pthread_mutex_t frame_ring_mutex;
+extern size_t yuv_frame_size;
 
 #endif // CAPTURE_HH
