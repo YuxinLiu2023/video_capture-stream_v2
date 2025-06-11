@@ -388,16 +388,12 @@ int main(int argc, char * argv[])
   cerr << "Peer address: " << peer_addr.str() << endl;
   udp_sock.connect(peer_addr);
 
-  // read configuration from the peer
-  const auto width = config_msg.width;
-  const auto height = config_msg.height;
-  const auto frame_rate = config_msg.frame_rate;
   const auto target_bitrate = config_msg.target_bitrate;
 
-  cerr << "Received config: width=" << to_string(width)
-       << " height=" << to_string(height)
-       << " FPS=" << to_string(frame_rate)
-       << " bitrate=" << to_string(target_bitrate) << endl;
+  cerr << "Received config: bitrate=" << to_string(target_bitrate) << endl;
+
+  const ConfigMsg config_msg_full(width, height, fps, target_bitrate);
+  udp_sock.send(config_msg_full.serialize_to_string());
 
   // if (verbose) {
   //   cerr << "Verbose mode is on." << endl;

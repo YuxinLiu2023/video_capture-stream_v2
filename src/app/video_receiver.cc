@@ -30,61 +30,117 @@ void print_usage(const string & program_name)
   << endl;
 }
 
+pair<Address, ConfigMsg> recv_config_msg(UDPSocket & udp_sock)
+{
+  // wait until a valid ConfigMsg is received
+  while (true) {
+    const auto & [peer_addr, raw_data] = udp_sock.recvfrom();
+
+    const shared_ptr<Msg> msg = Msg::parse_from_string(raw_data.value());
+    if (msg == nullptr or msg->type != Msg::Type::CONFIG) {
+      continue; // ignore invalid or non-config messages
+    }
+
+    const auto config_msg = dynamic_pointer_cast<ConfigMsg>(msg);
+    if (config_msg) {
+      return {peer_addr, *config_msg};
+    }
+  }
+}
+
 int main(int argc, char * argv[])
 {
-  // argument parsing
-  uint16_t frame_rate = 30;
-  unsigned int target_bitrate = 0; // kbps
-  int lazy_level = 0;
+  // // argument parsing
+  // uint16_t frame_rate = 30;
+  // unsigned int target_bitrate = 0; // kbps
+  // int lazy_level = 0;
   string output_path;
   bool verbose = false;
 
+  // const option cmd_line_opts[] = {
+  //   {"fps",     required_argument, nullptr, 'F'},
+  //   {"cbr",     required_argument, nullptr, 'C'},
+  //   {"lazy",    required_argument, nullptr, 'L'},
+  //   {"output",  required_argument, nullptr, 'o'},
+  //   {"verbose", no_argument,       nullptr, 'v'},
+  //   { nullptr,  0,                 nullptr,  0 },
+  // };
+
+  // while (true) {
+  //   const int opt = getopt_long(argc, argv, "o:v", cmd_line_opts, nullptr);
+  //   if (opt == -1) {
+  //     break;
+  //   }
+
+  //   switch (opt) {
+  //     case 'F':
+  //       frame_rate = narrow_cast<uint16_t>(strict_stoi(optarg));
+  //       break;
+  //     case 'C':
+  //       target_bitrate = strict_stoi(optarg);
+  //       break;
+  //     case 'L':
+  //       lazy_level = strict_stoi(optarg);
+  //       break;
+  //     case 'o':
+  //       output_path = optarg;
+  //       break;
+  //     case 'v':
+  //       verbose = true;
+  //       break;
+  //     default:
+  //       print_usage(argv[0]);
+  //       return EXIT_FAILURE;
+  //   }
+  // }
+
+  // if (optind != argc - 4) {
+  //   print_usage(argv[0]);
+  //   return EXIT_FAILURE;
+  // }
+
+  // ===== Argument parsing =====
+  if (argc < 3) {
+    cerr << "Usage: " << argv[0] << " <host> <port> [--cbr bitrate] [--lazy level] [--fps rate] [--output file] [--verbose]\n";
+    return EXIT_FAILURE;
+  }
+
+  const string host = argv[optind];
+  const auto port = narrow_cast<uint16_t>(strict_stoi(argv[optind + 1]));
+  // const auto width = narrow_cast<uint16_t>(strict_stoi(argv[optind + 2]));
+  // const auto height = narrow_cast<uint16_t>(strict_stoi(argv[optind + 3]));
+
+  unsigned int target_bitrate = 0; // kbps
+  int lazy_level = 0;
+
+  optind = 3;
   const option cmd_line_opts[] = {
-    {"fps",     required_argument, nullptr, 'F'},
-    {"cbr",     required_argument, nullptr, 'C'},
-    {"lazy",    required_argument, nullptr, 'L'},
-    {"output",  required_argument, nullptr, 'o'},
-    {"verbose", no_argument,       nullptr, 'v'},
-    { nullptr,  0,                 nullptr,  0 },
+    {"cbr",  required_argument, nullptr, 'C'},
+    {"lazy", required_argument, nullptr, 'L'},
+    {nullptr, 0, nullptr, 0},
   };
 
   while (true) {
-    const int opt = getopt_long(argc, argv, "o:v", cmd_line_opts, nullptr);
-    if (opt == -1) {
-      break;
-    }
+    const int opt = getopt_long(argc, argv, "C:L:", cmd_line_opts, nullptr);
+    if (opt == -1) break;
 
     switch (opt) {
-      case 'F':
-        frame_rate = narrow_cast<uint16_t>(strict_stoi(optarg));
-        break;
       case 'C':
         target_bitrate = strict_stoi(optarg);
         break;
       case 'L':
         lazy_level = strict_stoi(optarg);
         break;
-      case 'o':
-        output_path = optarg;
-        break;
-      case 'v':
-        verbose = true;
-        break;
       default:
-        print_usage(argv[0]);
+        cerr << "Invalid option.\n";
         return EXIT_FAILURE;
     }
   }
 
-  if (optind != argc - 4) {
-    print_usage(argv[0]);
+  if (target_bitrate == 0) {
+    cerr << "--cbr <bitrate> is required.\n";
     return EXIT_FAILURE;
   }
-
-  const string host = argv[optind];
-  const auto port = narrow_cast<uint16_t>(strict_stoi(argv[optind + 1]));
-  const auto width = narrow_cast<uint16_t>(strict_stoi(argv[optind + 2]));
-  const auto height = narrow_cast<uint16_t>(strict_stoi(argv[optind + 3]));
 
   Address peer_addr{host, port};
   cerr << "Peer address: " << peer_addr.str() << endl;
@@ -95,8 +151,25 @@ int main(int argc, char * argv[])
   cerr << "Local address: " << udp_sock.local_address().str() << endl;
 
   // request a specific configuration
-  const ConfigMsg config_msg(width, height, frame_rate, target_bitrate);
+  const ConfigMsg config_msg(0, 0, 0, target_bitrate);
   udp_sock.send(config_msg.serialize_to_string());
+
+  uint16_t width = 0, height = 0, frame_rate = 0;
+  // wait for the sender to send a ConfigMsg with width, height, and frame rate
+  while(true) {
+    const auto & [peer_addr, config_msg] = recv_config_msg(udp_sock);
+    width = config_msg.width;
+    height = config_msg.height;
+    frame_rate = config_msg.frame_rate;
+    target_bitrate = config_msg.target_bitrate;
+
+    cerr << "Received config: width=" << to_string(width)
+         << " height=" << to_string(height)
+         << " FPS=" << to_string(frame_rate)
+         << " bitrate=" << to_string(target_bitrate) << endl;
+    
+    break;
+  }
 
   // initialize decoder
   Decoder decoder(width, height, lazy_level, frame_rate, output_path);
