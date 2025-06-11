@@ -34,7 +34,7 @@ int fd = -1;
 int width = 1920;
 int height = 1080;
 int fps = 60;
-int pixel_mode = 422;
+// int pixel_mode = 422;
 void *buffers = NULL;
 unsigned n_buffers = 0;
 int run = 1;
@@ -231,7 +231,12 @@ void capture_disk_loop(const char *fname) {
 }
 
 // ------------------ Streaming-Oriented Capture Loop ------------------
-void capture_streaming_loop() {
+void *capture_streaming_loop(void *arg) {
+
+  auto *params = static_cast<CaptureParams *>(arg);
+  width = params->width;
+  height = params->height;
+  fps = params->fps;
 
   fd = open(dev_name, O_RDWR | O_NONBLOCK, 0);
 
@@ -369,4 +374,6 @@ void capture_streaming_loop() {
   av_free(prev_out_data);
   free(preview_rgb);
   close(fd);
+
+  return nullptr;
 }

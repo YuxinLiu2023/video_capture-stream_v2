@@ -15,7 +15,7 @@ void capture_loop(const char *fname);
 void sigint_handler(int s);
 int low_space();
 void capture_disk_loop(const char *fname);
-void capture_streaming_loop();
+void *capture_streaming_loop(void *arg);
 
 extern const char *dev_name;
 extern int fd;
@@ -47,5 +47,13 @@ extern int frame_ring_tail;
 extern pthread_cond_t frame_available;
 extern pthread_mutex_t frame_ring_mutex;
 extern size_t yuv_frame_size;
+
+// ===== Capture parameters structure =====
+struct CaptureParams {
+  int width;
+  int height;
+  int fps;
+};
+
 
 #endif // CAPTURE_HH

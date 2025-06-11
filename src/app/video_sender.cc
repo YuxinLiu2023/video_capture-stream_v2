@@ -267,45 +267,134 @@ pair<Address, ConfigMsg> recv_config_msg(UDPSocket & udp_sock)
 //   return EXIT_SUCCESS;
 // }
 
+bool validate_resolution_and_fps(int width, int height, int fps) {
+
+  struct Tier { int w, h, max_fps; };
+  static const Tier tiers[] = {
+    { 1280,  720, 120 },
+    { 1920, 1080,  60 },
+    { 2000, 1500,  50 },
+    { 3840, 2160,  20 },
+    { 4000, 3000,  14 },
+    { 8000, 6000,   3 },
+  };
+  static const int allowed_fps[] = { 120, 60, 50, 20, 14, 3 };
+
+  int tier_max = 0;
+  for (const auto& tier : tiers) {
+    if (width <= tier.w && height <= tier.h) {
+      tier_max = tier.max_fps;
+      break;
+    }
+  }
+
+  if (!tier_max) {
+    cerr << "Unsupported resolution: " << width << "x" << height << endl;
+    return false;
+  }
+
+  for (int allowed : allowed_fps) {
+    if (fps == allowed && fps <= tier_max) {
+      return true;
+    }
+  }
+
+  cerr << "Unsupported frame rate " << fps << "fps for resolution "
+       << width << "x" << height << " (max " << tier_max << "fps)\n";
+  return false;
+}
+
+
 
 // ************************** Main: get frames from buffer ***********************************
 int main(int argc, char * argv[])
 {
   // argument parsing
-  string output_path;
-  bool verbose = false;
+  // string output_path;
+  // bool verbose = false;
 
+  // const option cmd_line_opts[] = {
+  //   {"mtu",     required_argument, nullptr, 'M'},
+  //   {"output",  required_argument, nullptr, 'o'},
+  //   {"verbose", no_argument,       nullptr, 'v'},
+  //   { nullptr,  0,                 nullptr,  0 },
+  // };
+
+  // while (true) {
+  //   const int opt = getopt_long(argc, argv, "o:v", cmd_line_opts, nullptr);
+  //   if (opt == -1) {
+  //     break;
+  //   }
+
+  //   switch (opt) {
+  //     case 'M':
+  //       Datagram::set_mtu(strict_stoi(optarg));
+  //       break;
+  //     case 'o':
+  //       output_path = optarg;
+  //       break;
+  //     case 'v':
+  //       verbose = true;
+  //       break;
+  //     default:
+  //       print_usage(argv[0]);
+  //       return EXIT_FAILURE;
+  //   }
+  // }
+
+  // if (optind != argc - 2) {
+  //   print_usage(argv[0]);
+  //   return EXIT_FAILURE;
+  // }
+
+  // ===== Argument parsing =====
+  if (argc < 6) {
+    cerr << "Usage: " << argv[0] << " <port> -w <width> -h <height> -r <fps>\n";
+    return EXIT_FAILURE;
+  }
+
+  int port_int = atoi(argv[1]);
+  if (port_int <= 0) {
+    cerr << "Invalid port number: " << argv[1] << endl;
+    return EXIT_FAILURE;
+  }
+  uint16_t port = static_cast<uint16_t>(port_int);
+
+  int opt;
+  optind = 2;
   const option cmd_line_opts[] = {
-    {"mtu",     required_argument, nullptr, 'M'},
-    {"output",  required_argument, nullptr, 'o'},
-    {"verbose", no_argument,       nullptr, 'v'},
-    { nullptr,  0,                 nullptr,  0 },
+    {"width",  required_argument, nullptr, 'w'},
+    {"height", required_argument, nullptr, 'h'},
+    {"fps",    required_argument, nullptr, 'r'},
+    {nullptr,  0,                 nullptr,  0 }
   };
 
-  while (true) {
-    const int opt = getopt_long(argc, argv, "o:v", cmd_line_opts, nullptr);
-    if (opt == -1) {
-      break;
-    }
-
+  while ((opt = getopt_long(argc, argv, "w:h:r:", cmd_line_opts, nullptr)) != -1) {
     switch (opt) {
-      case 'M':
-        Datagram::set_mtu(strict_stoi(optarg));
+      case 'w':
+        width = atoi(optarg);
         break;
-      case 'o':
-        output_path = optarg;
+      case 'h':
+        height = atoi(optarg);
         break;
-      case 'v':
-        verbose = true;
+      case 'r':
+        fps = atoi(optarg);
         break;
       default:
-        print_usage(argv[0]);
+        cerr << "Usage: " << argv[0] << " <port> -w <width> -h <height> -r <fps>\n";
         return EXIT_FAILURE;
     }
   }
 
-  if (optind != argc - 2) {
-    print_usage(argv[0]);
+  if (width <= 0 || height <= 0 || fps <= 0) {
+    cerr << "Invalid input: width, height, and fps must all be > 0\n";
+    return EXIT_FAILURE;
+  }
+
+  cerr << "Input: Port: " << port << ", Width: " << width
+       << ", Height: " << height << ", FPS: " << fps << endl;
+
+  if (!validate_resolution_and_fps(width, height, fps)) {
     return EXIT_FAILURE;
   }
 
@@ -320,15 +409,18 @@ int main(int argc, char * argv[])
   cerr << "Initialized shared frame ring buffer with size: " << FRAME_RING_SIZE << endl;
 
   // ===== Launch capture thread =====
+  auto *cap_params = new CaptureParams{width, height, fps};
+
   pthread_t cap_tid;
-  pthread_create(&cap_tid, nullptr, [](void *) -> void * {
-    capture_streaming_loop();
-    return nullptr;
-  }, nullptr);
+  // pthread_create(&cap_tid, nullptr, [](void *) -> void * {
+  //   capture_streaming_loop();
+  //   return nullptr;
+  // }, nullptr);
+  pthread_create(&cap_tid, nullptr, capture_streaming_loop, cap_params);
   cerr << "Launched capture thread." << endl;
 
-  const auto port = narrow_cast<uint16_t>(strict_stoi(argv[optind]));
-  const string y4m_path = argv[optind + 1];
+  // const auto port = narrow_cast<uint16_t>(strict_stoi(argv[optind]));
+  // const string y4m_path = argv[optind + 1];
 
   UDPSocket udp_sock;
   udp_sock.bind({"0", port});
@@ -352,9 +444,9 @@ int main(int argc, char * argv[])
        << " FPS=" << to_string(frame_rate)
        << " bitrate=" << to_string(target_bitrate) << endl;
 
-  if (verbose) {
-    cerr << "Verbose mode is on." << endl;
-  }
+  // if (verbose) {
+  //   cerr << "Verbose mode is on." << endl;
+  // }
 
   // // set UDP socket to non-blocking now
   // udp_sock.set_blocking(false);
