@@ -352,8 +352,13 @@ int main(int argc, char * argv[])
        << " FPS=" << to_string(frame_rate)
        << " bitrate=" << to_string(target_bitrate) << endl;
 
-  // set UDP socket to non-blocking now
-  udp_sock.set_blocking(false);
+  if (verbose) {
+    cerr << "Verbose mode is on." << endl;
+  }
+
+
+  // // set UDP socket to non-blocking now
+  // udp_sock.set_blocking(false);
 
   // // open the video file
   // YUV4MPEG video_input(y4m_path, width, height);
@@ -491,7 +496,7 @@ int main(int argc, char * argv[])
   //   }
   // );
 
-  // main loop
+  // //main loop
   // while (true) {
   //   poller.poll(-1);
   // }
