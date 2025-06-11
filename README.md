@@ -1,6 +1,6 @@
 # Pipeline Version 1
 
-Sender side: Jetson board, /guest/ringmaster
+Sender side: Jetson board, Ringmaster
 
 Receiver side: the server
 
