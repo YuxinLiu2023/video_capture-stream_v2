@@ -32,7 +32,7 @@ extern int run;
 #endif
 
 // ===== Shared ring buffer between capturing thread and streaming thread =====
-constexpr int FRAME_RING_SIZE = 100;
+constexpr int FRAME_RING_SIZE = 500;
 
 struct YUV420PFrame {
   uint8_t *data;

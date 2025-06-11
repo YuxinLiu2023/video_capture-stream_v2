@@ -167,13 +167,6 @@ int main(int argc, char * argv[])
   }
   // cerr << "Initialized shared frame ring buffer with size: " << FRAME_RING_SIZE << endl;
 
-  // ===== Launch capture thread =====
-  auto *cap_params = new CaptureParams{width, height, fps};
-
-  pthread_t cap_tid;
-  pthread_create(&cap_tid, nullptr, capture_streaming_loop, cap_params);
-  // cerr << "Launched capture thread." << endl;
-
   UDPSocket udp_sock;
   udp_sock.bind({"0", port});
   cerr << "Local address: " << udp_sock.local_address().str() << endl;
@@ -207,12 +200,21 @@ int main(int argc, char * argv[])
   encoder.set_target_bitrate(target_bitrate);
   encoder.set_verbose(verbose);
 
+  // ===== Launch capture thread =====
+  auto *cap_params = new CaptureParams{width, height, fps};
+
+  pthread_t cap_tid;
+  pthread_create(&cap_tid, nullptr, capture_streaming_loop, cap_params);
+  // cerr << "Launched capture thread." << endl;
+
   Poller poller;
 
   // create a periodic timer with the same period as the frame interval
   Timerfd fps_timer;
   const timespec frame_interval {0, static_cast<long>(BILLION / fps)};
   fps_timer.set_time(frame_interval, frame_interval);
+  cerr << "Frame timer set for interval: " << frame_interval.tv_sec
+     << "s " << frame_interval.tv_nsec << "ns" << endl;
 
   // read a raw frame when the periodic timer fires
   poller.register_event(fps_timer, Poller::In,
@@ -346,6 +348,7 @@ int main(int argc, char * argv[])
 
   //main loop
   while (keep_running) {
+    cerr << "[POLL] calling poller..." << endl;
     poller.poll(1);
   }
 
