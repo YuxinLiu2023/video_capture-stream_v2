@@ -281,7 +281,12 @@ void capture_streaming_loop() {
       break;
     }
 
-    if (poll(&pfd, 1, 1000) < 0) continue;
+    if (poll(&pfd, 1, 1000) < 0){
+      if (errno == EINTR)
+          continue;
+      perror("poll");
+      break;
+    }
 
     // Dequeue the next buffer containing a captured frame
     struct v4l2_buffer buf;
@@ -290,8 +295,12 @@ void capture_streaming_loop() {
     buf.memory = V4L2_MEMORY_MMAP;
     ioctl(fd, VIDIOC_DQBUF, &buf);
 
+    cerr << "Dequeued buffer index: " << buf.index << endl;
+
     // Pointer to raw YUYV data from mapped buffers
     uint8_t *data = (uint8_t *)buffers + buf.m.offset;
+
+    cerr << "Buffer size: " << buf.bytesused << ", offset: " << buf.m.offset << endl;
 
     // --- Preview conversion: YUYV422 → RGB565 (scaled to 640×480) ---
     memcpy(prev_in_data, data, prev_in_linesize * height);
@@ -302,7 +311,7 @@ void capture_streaming_loop() {
 
     sws_scale(sws_preview_ctx, in, in_ls, 0, height, out, out_ls);
     pthread_mutex_lock(&preview_mtx);
-    memcpy(preview_rgb, prev_out_data, preview_w * preview_h * 2);
+    memcpy(preview_rgb, prev_out_data, preview_w * preview_h);
     pthread_mutex_unlock(&preview_mtx);
 
     cerr << "Captured frame: " << buf.index << ", size: " << buf.bytesused << endl;
