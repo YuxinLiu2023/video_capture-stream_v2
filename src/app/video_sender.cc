@@ -309,44 +309,6 @@ bool validate_resolution_and_fps(int width, int height, int fps) {
 // ************************** Main: get frames from buffer ***********************************
 int main(int argc, char * argv[])
 {
-  // argument parsing
-  // string output_path;
-  // bool verbose = false;
-
-  // const option cmd_line_opts[] = {
-  //   {"mtu",     required_argument, nullptr, 'M'},
-  //   {"output",  required_argument, nullptr, 'o'},
-  //   {"verbose", no_argument,       nullptr, 'v'},
-  //   { nullptr,  0,                 nullptr,  0 },
-  // };
-
-  // while (true) {
-  //   const int opt = getopt_long(argc, argv, "o:v", cmd_line_opts, nullptr);
-  //   if (opt == -1) {
-  //     break;
-  //   }
-
-  //   switch (opt) {
-  //     case 'M':
-  //       Datagram::set_mtu(strict_stoi(optarg));
-  //       break;
-  //     case 'o':
-  //       output_path = optarg;
-  //       break;
-  //     case 'v':
-  //       verbose = true;
-  //       break;
-  //     default:
-  //       print_usage(argv[0]);
-  //       return EXIT_FAILURE;
-  //   }
-  // }
-
-  // if (optind != argc - 2) {
-  //   print_usage(argv[0]);
-  //   return EXIT_FAILURE;
-  // }
-
   // ===== Argument parsing =====
   if (argc < 6) {
     cerr << "Usage: " << argv[0] << " <port> -w <width> -h <height> -r <fps>\n";
@@ -406,21 +368,14 @@ int main(int argc, char * argv[])
     frame_ring[i].ready = false;
     pthread_mutex_init(&frame_ring[i].lock, nullptr);
   }
-  cerr << "Initialized shared frame ring buffer with size: " << FRAME_RING_SIZE << endl;
+  // cerr << "Initialized shared frame ring buffer with size: " << FRAME_RING_SIZE << endl;
 
   // ===== Launch capture thread =====
   auto *cap_params = new CaptureParams{width, height, fps};
 
   pthread_t cap_tid;
-  // pthread_create(&cap_tid, nullptr, [](void *) -> void * {
-  //   capture_streaming_loop();
-  //   return nullptr;
-  // }, nullptr);
   pthread_create(&cap_tid, nullptr, capture_streaming_loop, cap_params);
-  cerr << "Launched capture thread." << endl;
-
-  // const auto port = narrow_cast<uint16_t>(strict_stoi(argv[optind]));
-  // const string y4m_path = argv[optind + 1];
+  // cerr << "Launched capture thread." << endl;
 
   UDPSocket udp_sock;
   udp_sock.bind({"0", port});

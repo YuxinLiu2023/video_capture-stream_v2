@@ -242,6 +242,10 @@ void *capture_streaming_loop(void *arg) {
 
   // Set V4L2 format & parameters, initialize memory mapping, and start capture
   set_format();
+  cerr << "Set format: " << dev_name 
+       << " width=" << width 
+       << " height=" << height 
+       << " FPS=" << fps << endl;
   init_mmap();
 
   // Initialize buffers for preview
@@ -272,12 +276,12 @@ void *capture_streaming_loop(void *arg) {
     width, height, AV_PIX_FMT_YUV420P, 
     SWS_BILINEAR, NULL, NULL, NULL);
   
-  cerr<< "Initialized Preview and YUV420P conversion." << endl;
+  // cerr<< "Initialized Preview and YUV420P conversion." << endl;
 
   pthread_t tid;
   pthread_create(&tid, NULL, preview_thread, NULL);
 
-  cerr << "Launched preview thread." << endl;
+  // cerr << "Launched preview thread." << endl;
 
   // Start streaming on the V4L2 device
   struct pollfd pfd = { fd, POLLIN, 0 };
@@ -306,12 +310,12 @@ void *capture_streaming_loop(void *arg) {
     buf.memory = V4L2_MEMORY_MMAP;
     ioctl(fd, VIDIOC_DQBUF, &buf);
 
-    cerr << "Dequeued buffer index: " << buf.index << endl;
+    // cerr << "Dequeued buffer index: " << buf.index << endl;
 
     // Pointer to raw YUYV data from mapped buffers
     uint8_t *data = (uint8_t *)buffers + buf.m.offset;
 
-    cerr << "Buffer size: " << buf.bytesused << ", offset: " << buf.m.offset << endl;
+    // cerr << "Buffer size: " << buf.bytesused << ", offset: " << buf.m.offset << endl;
 
     // --- Preview conversion: YUYV422 → RGB565 (scaled to 640×480) ---
     memcpy(prev_in_data, data, prev_in_linesize * height);
@@ -325,7 +329,7 @@ void *capture_streaming_loop(void *arg) {
     memcpy(preview_rgb, prev_out_data, prev_out_linesize * preview_h);
     pthread_mutex_unlock(&preview_mtx);
 
-    cerr << "Captured frame: " << buf.index << ", size: " << buf.bytesused << endl;
+    // cerr << "Captured frame: " << buf.index << ", size: " << buf.bytesused << endl;
 
     // YUV420P conversion
     memcpy(ff_in_data, data, ff_in_linesize * height);
