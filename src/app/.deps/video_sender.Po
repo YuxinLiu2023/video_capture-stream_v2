@@ -175,8 +175,37 @@ video_sender.o: video_sender.cc /usr/include/stdc-predef.h \
  /usr/include/c++/11/pstl/execution_defs.h /usr/include/c++/11/chrono \
  /usr/include/c++/11/ratio /usr/include/c++/11/limits \
  /usr/include/c++/11/ctime /usr/include/c++/11/bits/parse_numbers.h \
- ../util/conversion.hh /usr/include/c++/11/iomanip \
- /usr/include/c++/11/locale \
+ /usr/include/c++/11/csignal /usr/include/signal.h \
+ /usr/include/x86_64-linux-gnu/bits/signum-generic.h \
+ /usr/include/x86_64-linux-gnu/bits/signum-arch.h \
+ /usr/include/x86_64-linux-gnu/bits/types/sig_atomic_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h \
+ /usr/include/x86_64-linux-gnu/bits/siginfo-arch.h \
+ /usr/include/x86_64-linux-gnu/bits/siginfo-consts.h \
+ /usr/include/x86_64-linux-gnu/bits/siginfo-consts-arch.h \
+ /usr/include/x86_64-linux-gnu/bits/types/sigval_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/sigevent_t.h \
+ /usr/include/x86_64-linux-gnu/bits/sigevent-consts.h \
+ /usr/include/x86_64-linux-gnu/bits/sigaction.h \
+ /usr/include/x86_64-linux-gnu/bits/sigcontext.h \
+ /usr/include/x86_64-linux-gnu/bits/types/stack_t.h \
+ /usr/include/x86_64-linux-gnu/sys/ucontext.h \
+ /usr/include/x86_64-linux-gnu/bits/sigstack.h \
+ /usr/include/x86_64-linux-gnu/bits/sigstksz.h /usr/include/unistd.h \
+ /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+ /usr/include/x86_64-linux-gnu/bits/environments.h \
+ /usr/include/x86_64-linux-gnu/bits/confname.h \
+ /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
+ /usr/include/linux/close_range.h \
+ /usr/include/x86_64-linux-gnu/bits/ss_flags.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_sigstack.h \
+ /usr/include/x86_64-linux-gnu/bits/sigthread.h \
+ /usr/include/x86_64-linux-gnu/bits/signal_ext.h \
+ /usr/include/c++/11/atomic ../util/conversion.hh \
+ /usr/include/c++/11/iomanip /usr/include/c++/11/locale \
  /usr/include/c++/11/bits/locale_facets_nonio.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/time_members.h \
  /usr/include/x86_64-linux-gnu/c++/11/bits/messages_members.h \
@@ -206,14 +235,7 @@ video_sender.o: video_sender.cc /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/bits/fcntl-linux.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h \
  /usr/include/linux/falloc.h /usr/include/x86_64-linux-gnu/bits/fcntl2.h \
- /usr/include/unistd.h /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
- /usr/include/x86_64-linux-gnu/bits/environments.h \
- /usr/include/x86_64-linux-gnu/bits/confname.h \
- /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
- /usr/include/x86_64-linux-gnu/bits/unistd.h \
- /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
- /usr/include/linux/close_range.h ../util/udp_socket.hh \
- /usr/include/c++/11/optional \
+ ../util/udp_socket.hh /usr/include/c++/11/optional \
  /usr/include/c++/11/bits/enable_special_members.h ../util/socket.hh \
  /usr/include/x86_64-linux-gnu/sys/socket.h \
  /usr/include/x86_64-linux-gnu/bits/socket.h \
@@ -227,8 +249,6 @@ video_sender.o: video_sender.cc /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/bits/socket2.h ../util/address.hh \
  /usr/include/netdb.h /usr/include/netinet/in.h \
  /usr/include/x86_64-linux-gnu/bits/in.h /usr/include/rpc/netdb.h \
- /usr/include/x86_64-linux-gnu/bits/types/sigevent_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h \
  /usr/include/x86_64-linux-gnu/bits/netdb.h ../util/poller.hh \
  /usr/include/poll.h /usr/include/x86_64-linux-gnu/sys/poll.h \
  /usr/include/x86_64-linux-gnu/bits/poll.h \
@@ -477,6 +497,38 @@ video_sender.o: video_sender.cc /usr/include/stdc-predef.h \
 /usr/include/c++/11/limits:
 /usr/include/c++/11/ctime:
 /usr/include/c++/11/bits/parse_numbers.h:
+/usr/include/c++/11/csignal:
+/usr/include/signal.h:
+/usr/include/x86_64-linux-gnu/bits/signum-generic.h:
+/usr/include/x86_64-linux-gnu/bits/signum-arch.h:
+/usr/include/x86_64-linux-gnu/bits/types/sig_atomic_t.h:
+/usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h:
+/usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h:
+/usr/include/x86_64-linux-gnu/bits/siginfo-arch.h:
+/usr/include/x86_64-linux-gnu/bits/siginfo-consts.h:
+/usr/include/x86_64-linux-gnu/bits/siginfo-consts-arch.h:
+/usr/include/x86_64-linux-gnu/bits/types/sigval_t.h:
+/usr/include/x86_64-linux-gnu/bits/types/sigevent_t.h:
+/usr/include/x86_64-linux-gnu/bits/sigevent-consts.h:
+/usr/include/x86_64-linux-gnu/bits/sigaction.h:
+/usr/include/x86_64-linux-gnu/bits/sigcontext.h:
+/usr/include/x86_64-linux-gnu/bits/types/stack_t.h:
+/usr/include/x86_64-linux-gnu/sys/ucontext.h:
+/usr/include/x86_64-linux-gnu/bits/sigstack.h:
+/usr/include/x86_64-linux-gnu/bits/sigstksz.h:
+/usr/include/unistd.h:
+/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
+/usr/include/x86_64-linux-gnu/bits/environments.h:
+/usr/include/x86_64-linux-gnu/bits/confname.h:
+/usr/include/x86_64-linux-gnu/bits/getopt_posix.h:
+/usr/include/x86_64-linux-gnu/bits/unistd.h:
+/usr/include/x86_64-linux-gnu/bits/unistd_ext.h:
+/usr/include/linux/close_range.h:
+/usr/include/x86_64-linux-gnu/bits/ss_flags.h:
+/usr/include/x86_64-linux-gnu/bits/types/struct_sigstack.h:
+/usr/include/x86_64-linux-gnu/bits/sigthread.h:
+/usr/include/x86_64-linux-gnu/bits/signal_ext.h:
+/usr/include/c++/11/atomic:
 ../util/conversion.hh:
 /usr/include/c++/11/iomanip:
 /usr/include/c++/11/locale:
@@ -519,14 +571,6 @@ video_sender.o: video_sender.cc /usr/include/stdc-predef.h \
 /usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h:
 /usr/include/linux/falloc.h:
 /usr/include/x86_64-linux-gnu/bits/fcntl2.h:
-/usr/include/unistd.h:
-/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
-/usr/include/x86_64-linux-gnu/bits/environments.h:
-/usr/include/x86_64-linux-gnu/bits/confname.h:
-/usr/include/x86_64-linux-gnu/bits/getopt_posix.h:
-/usr/include/x86_64-linux-gnu/bits/unistd.h:
-/usr/include/x86_64-linux-gnu/bits/unistd_ext.h:
-/usr/include/linux/close_range.h:
 ../util/udp_socket.hh:
 /usr/include/c++/11/optional:
 /usr/include/c++/11/bits/enable_special_members.h:
@@ -546,8 +590,6 @@ video_sender.o: video_sender.cc /usr/include/stdc-predef.h \
 /usr/include/netinet/in.h:
 /usr/include/x86_64-linux-gnu/bits/in.h:
 /usr/include/rpc/netdb.h:
-/usr/include/x86_64-linux-gnu/bits/types/sigevent_t.h:
-/usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h:
 /usr/include/x86_64-linux-gnu/bits/netdb.h:
 ../util/poller.hh:
 /usr/include/poll.h:

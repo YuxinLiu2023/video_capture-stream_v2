@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <utility>
 #include <chrono>
+#include <csignal>
+#include <atomic>
 
 #include "conversion.hh"
 #include "timerfd.hh"
@@ -15,6 +17,8 @@
 #include "encoder.hh"
 #include "timestamp.hh"
 #include "capture.hh"
+
+std::atomic<bool> keep_running{true};
 
 using namespace std;
 using namespace chrono;
@@ -90,6 +94,10 @@ bool validate_resolution_and_fps(int width, int height, int fps) {
   return false;
 }
 
+void handle_sigint(int)
+{
+  keep_running = false;
+}
 
 
 // ************************** Main: get frames from buffer ***********************************
@@ -183,6 +191,8 @@ int main(int argc, char * argv[])
   const ConfigMsg config_msg_full(width, height, fps, target_bitrate);
   udp_sock.send(config_msg_full.serialize_to_string());
 
+  signal(SIGINT, handle_sigint);
+
   // set UDP socket to non-blocking now
   udp_sock.set_blocking(false);
 
@@ -214,12 +224,6 @@ int main(int argc, char * argv[])
         cerr << "Warning: skipping " << num_exp - 1 << " raw frames" << endl;
       }
 
-      // for (unsigned int i = 0; i < num_exp; i++) {
-      //   // fetch a raw frame into 'raw_img' from the video input
-      //   if (not video_input.read_frame(raw_img)) {
-      //     throw runtime_error("Reached the end of video input");
-      //   }
-      // }
       for (unsigned int i = 0; i < num_exp; i++) {
         // Read frame from ring buffer
         pthread_mutex_lock(&frame_ring_mutex);
@@ -237,6 +241,7 @@ int main(int argc, char * argv[])
         frame_ring_tail = (frame_ring_tail + 1) % FRAME_RING_SIZE;
         pthread_mutex_unlock(&frame_ring_mutex);
       }
+      cerr << "Read raw frame from ring buffer: index=" << frame_ring_tail << endl;
 
       // compress 'raw_img' into frame 'frame_id' and packetize it
       encoder.compress_frame(raw_img);
