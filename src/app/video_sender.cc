@@ -356,7 +356,6 @@ int main(int argc, char * argv[])
     cerr << "Verbose mode is on." << endl;
   }
 
-
   // // set UDP socket to non-blocking now
   // udp_sock.set_blocking(false);
 

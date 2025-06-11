@@ -33,7 +33,7 @@ const char *dev_name = "/dev/video0";
 int fd = -1;
 int width = 1920;
 int height = 1080;
-int fps = 30;
+int fps = 60;
 int pixel_mode = 422;
 void *buffers = NULL;
 unsigned n_buffers = 0;
@@ -233,6 +233,12 @@ void capture_disk_loop(const char *fname) {
 // ------------------ Streaming-Oriented Capture Loop ------------------
 void capture_streaming_loop() {
 
+  fd = open(dev_name, O_RDWR | O_NONBLOCK, 0);
+
+  // Set V4L2 format & parameters, initialize memory mapping, and start capture
+  set_format();
+  init_mmap();
+
   // Initialize buffers for preview
   prev_in_linesize = width * 2;
   prev_out_linesize = preview_w * 2;
@@ -311,7 +317,7 @@ void capture_streaming_loop() {
 
     sws_scale(sws_preview_ctx, in, in_ls, 0, height, out, out_ls);
     pthread_mutex_lock(&preview_mtx);
-    memcpy(preview_rgb, prev_out_data, preview_w * preview_h);
+    memcpy(preview_rgb, prev_out_data, prev_out_linesize * preview_h);
     pthread_mutex_unlock(&preview_mtx);
 
     cerr << "Captured frame: " << buf.index << ", size: " << buf.bytesused << endl;
@@ -362,4 +368,5 @@ void capture_streaming_loop() {
   av_free(prev_in_data);
   av_free(prev_out_data);
   free(preview_rgb);
+  close(fd);
 }
