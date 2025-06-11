@@ -68,6 +68,32 @@ void RawImage::copy_from_yuyv(const string_view src)
   }
 }
 
+void RawImage::copy_from_ringbuffer(const uint8_t* src_data, size_t size) {
+  const size_t expected_size = y_size() + 2 * uv_size(); // Y + U + V
+  if (size != expected_size) {
+    throw std::runtime_error("RawImage::copy_from_ringbuffer: invalid frame size");
+  }
+
+  const uint8_t* src_y = src_data;
+  const uint8_t* src_u = src_y + y_size();
+  const uint8_t* src_v = src_u + uv_size();
+
+  // Copy Y plane
+  for (uint16_t row = 0; row < display_height_; ++row) {
+    std::memcpy(y_plane() + row * y_stride(), src_y + row * display_width_, display_width_);
+  }
+
+  // Copy U plane
+  for (uint16_t row = 0; row < display_height_ / 2; ++row) {
+    std::memcpy(u_plane() + row * u_stride(), src_u + row * display_width_ / 2, display_width_ / 2);
+  }
+
+  // Copy V plane
+  for (uint16_t row = 0; row < display_height_ / 2; ++row) {
+    std::memcpy(v_plane() + row * v_stride(), src_v + row * display_width_ / 2, display_width_ / 2);
+  }
+}
+
 void RawImage::copy_y_from(const string_view src)
 {
   if (src.size() != y_size()) {

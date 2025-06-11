@@ -95,6 +95,9 @@ bool validate_resolution_and_fps(int width, int height, int fps) {
 // ************************** Main: get frames from buffer ***********************************
 int main(int argc, char * argv[])
 {
+  string output_path;
+  bool verbose = false;
+
   // ===== Argument parsing =====
   if (argc < 6) {
     cerr << "Usage: " << argv[0] << " <port> -w <width> -h <height> -r <fps>\n";
@@ -186,143 +189,160 @@ int main(int argc, char * argv[])
   // // open the video file
   // YUV4MPEG video_input(y4m_path, width, height);
 
-  // // allocate a raw image
-  // RawImage raw_img(width, height);
+  // allocate a raw image
+  RawImage raw_img(width, height);
 
-  // // initialize the encoder
-  // Encoder encoder(width, height, frame_rate, output_path);
-  // encoder.set_target_bitrate(target_bitrate);
-  // encoder.set_verbose(verbose);
+  // initialize the encoder
+  Encoder encoder(width, height, fps, output_path);
+  encoder.set_target_bitrate(target_bitrate);
+  encoder.set_verbose(verbose);
 
-  // Poller poller;
+  Poller poller;
 
-  // // create a periodic timer with the same period as the frame interval
-  // Timerfd fps_timer;
-  // const timespec frame_interval {0, static_cast<long>(BILLION / frame_rate)};
-  // fps_timer.set_time(frame_interval, frame_interval);
+  // create a periodic timer with the same period as the frame interval
+  Timerfd fps_timer;
+  const timespec frame_interval {0, static_cast<long>(BILLION / fps)};
+  fps_timer.set_time(frame_interval, frame_interval);
 
-  // // read a raw frame when the periodic timer fires
-  // poller.register_event(fps_timer, Poller::In,
-  //   [&]()
-  //   {
-  //     // being lenient: read raw frames 'num_exp' times and use the last one
-  //     const auto num_exp = fps_timer.read_expirations();
-  //     if (num_exp > 1) {
-  //       cerr << "Warning: skipping " << num_exp - 1 << " raw frames" << endl;
-  //     }
+  // read a raw frame when the periodic timer fires
+  poller.register_event(fps_timer, Poller::In,
+    [&]()
+    {
+      // being lenient: read raw frames 'num_exp' times and use the last one
+      const auto num_exp = fps_timer.read_expirations();
+      if (num_exp > 1) {
+        cerr << "Warning: skipping " << num_exp - 1 << " raw frames" << endl;
+      }
 
-  //     for (unsigned int i = 0; i < num_exp; i++) {
-  //       // fetch a raw frame into 'raw_img' from the video input
-  //       if (not video_input.read_frame(raw_img)) {
-  //         throw runtime_error("Reached the end of video input");
-  //       }
-  //     }
+      // for (unsigned int i = 0; i < num_exp; i++) {
+      //   // fetch a raw frame into 'raw_img' from the video input
+      //   if (not video_input.read_frame(raw_img)) {
+      //     throw runtime_error("Reached the end of video input");
+      //   }
+      // }
+      for (unsigned int i = 0; i < num_exp; i++) {
+        // Read frame from ring buffer
+        pthread_mutex_lock(&frame_ring_mutex);
+        while (!frame_ring[frame_ring_tail].ready) {
+          pthread_cond_wait(&frame_available, &frame_ring_mutex);
+        }
+        pthread_mutex_unlock(&frame_ring_mutex);
 
-  //     // compress 'raw_img' into frame 'frame_id' and packetize it
-  //     encoder.compress_frame(raw_img);
+        pthread_mutex_lock(&frame_ring[frame_ring_tail].lock);
+        raw_img.copy_from_ringbuffer(frame_ring[frame_ring_tail].data, frame_ring[frame_ring_tail].size);
+        frame_ring[frame_ring_tail].ready = false;
+        pthread_mutex_unlock(&frame_ring[frame_ring_tail].lock);
 
-  //     // interested in socket being writable if there are datagrams to send
-  //     if (not encoder.send_buf().empty()) {
-  //       poller.activate(udp_sock, Poller::Out);
-  //     }
-  //   }
-  // );
+        pthread_mutex_lock(&frame_ring_mutex);
+        frame_ring_tail = (frame_ring_tail + 1) % FRAME_RING_SIZE;
+        pthread_mutex_unlock(&frame_ring_mutex);
+      }
 
-  // // when UDP socket is writable
-  // poller.register_event(udp_sock, Poller::Out,
-  //   [&]()
-  //   {
-  //     deque<Datagram> & send_buf = encoder.send_buf();
+      // compress 'raw_img' into frame 'frame_id' and packetize it
+      encoder.compress_frame(raw_img);
 
-  //     while (not send_buf.empty()) {
-  //       auto & datagram = send_buf.front();
+      // interested in socket being writable if there are datagrams to send
+      if (not encoder.send_buf().empty()) {
+        poller.activate(udp_sock, Poller::Out);
+      }
+    }
+  );
 
-  //       // timestamp the sending time before sending
-  //       datagram.send_ts = timestamp_us();
+  // when UDP socket is writable
+  poller.register_event(udp_sock, Poller::Out,
+    [&]()
+    {
+      deque<Datagram> & send_buf = encoder.send_buf();
 
-  //       if (udp_sock.send(datagram.serialize_to_string())) {
-  //         if (verbose) {
-  //           cerr << "Sent datagram: frame_id=" << datagram.frame_id
-  //                << " frag_id=" << datagram.frag_id
-  //                << " frag_cnt=" << datagram.frag_cnt
-  //                << " rtx=" << datagram.num_rtx << endl;
-  //         }
+      while (not send_buf.empty()) {
+        auto & datagram = send_buf.front();
 
-  //         // move the sent datagram to unacked if not a retransmission
-  //         if (datagram.num_rtx == 0) {
-  //           encoder.add_unacked(move(datagram));
-  //         }
+        // timestamp the sending time before sending
+        datagram.send_ts = timestamp_us();
 
-  //         send_buf.pop_front();
-  //       } else { // EWOULDBLOCK; try again later
-  //         datagram.send_ts = 0; // since it wasn't sent successfully
-  //         break;
-  //       }
-  //     }
+        if (udp_sock.send(datagram.serialize_to_string())) {
+          if (verbose) {
+            cerr << "Sent datagram: frame_id=" << datagram.frame_id
+                 << " frag_id=" << datagram.frag_id
+                 << " frag_cnt=" << datagram.frag_cnt
+                 << " rtx=" << datagram.num_rtx << endl;
+          }
 
-  //     // not interested in socket being writable if no datagrams to send
-  //     if (send_buf.empty()) {
-  //       poller.deactivate(udp_sock, Poller::Out);
-  //     }
-  //   }
-  // );
+          // move the sent datagram to unacked if not a retransmission
+          if (datagram.num_rtx == 0) {
+            encoder.add_unacked(move(datagram));
+          }
 
-  // // when UDP socket is readable
-  // poller.register_event(udp_sock, Poller::In,
-  //   [&]()
-  //   {
-  //     while (true) {
-  //       const auto & raw_data = udp_sock.recv();
+          send_buf.pop_front();
+        } else { // EWOULDBLOCK; try again later
+          datagram.send_ts = 0; // since it wasn't sent successfully
+          break;
+        }
+      }
 
-  //       if (not raw_data) { // EWOULDBLOCK; try again when data is available
-  //         break;
-  //       }
-  //       const shared_ptr<Msg> msg = Msg::parse_from_string(*raw_data);
+      // not interested in socket being writable if no datagrams to send
+      if (send_buf.empty()) {
+        poller.deactivate(udp_sock, Poller::Out);
+      }
+    }
+  );
 
-  //       // ignore invalid or non-ACK messages
-  //       if (msg == nullptr or msg->type != Msg::Type::ACK) {
-  //         return;
-  //       }
+  // when UDP socket is readable
+  poller.register_event(udp_sock, Poller::In,
+    [&]()
+    {
+      while (true) {
+        const auto & raw_data = udp_sock.recv();
 
-  //       const auto ack = dynamic_pointer_cast<AckMsg>(msg);
+        if (not raw_data) { // EWOULDBLOCK; try again when data is available
+          break;
+        }
+        const shared_ptr<Msg> msg = Msg::parse_from_string(*raw_data);
 
-  //       if (verbose) {
-  //         cerr << "Received ACK: frame_id=" << ack->frame_id
-  //              << " frag_id=" << ack->frag_id << endl;
-  //       }
+        // ignore invalid or non-ACK messages
+        if (msg == nullptr or msg->type != Msg::Type::ACK) {
+          return;
+        }
 
-  //       // RTT estimation, retransmission, etc.
-  //       encoder.handle_ack(ack);
+        const auto ack = dynamic_pointer_cast<AckMsg>(msg);
 
-  //       // send_buf might contain datagrams to be retransmitted now
-  //       if (not encoder.send_buf().empty()) {
-  //         poller.activate(udp_sock, Poller::Out);
-  //       }
-  //     }
-  //   }
-  // );
+        if (verbose) {
+          cerr << "Received ACK: frame_id=" << ack->frame_id
+               << " frag_id=" << ack->frag_id << endl;
+        }
 
-  // // create a periodic timer for outputting stats every second
-  // Timerfd stats_timer;
-  // const timespec stats_interval {1, 0};
-  // stats_timer.set_time(stats_interval, stats_interval);
+        // RTT estimation, retransmission, etc.
+        encoder.handle_ack(ack);
 
-  // poller.register_event(stats_timer, Poller::In,
-  //   [&]()
-  //   {
-  //     if (stats_timer.read_expirations() == 0) {
-  //       return;
-  //     }
+        // send_buf might contain datagrams to be retransmitted now
+        if (not encoder.send_buf().empty()) {
+          poller.activate(udp_sock, Poller::Out);
+        }
+      }
+    }
+  );
 
-  //     // output stats every second
-  //     encoder.output_periodic_stats();
-  //   }
-  // );
+  // create a periodic timer for outputting stats every second
+  Timerfd stats_timer;
+  const timespec stats_interval {1, 0};
+  stats_timer.set_time(stats_interval, stats_interval);
 
-  // //main loop
-  // while (true) {
-  //   poller.poll(-1);
-  // }
+  poller.register_event(stats_timer, Poller::In,
+    [&]()
+    {
+      if (stats_timer.read_expirations() == 0) {
+        return;
+      }
+
+      // output stats every second
+      encoder.output_periodic_stats();
+    }
+  );
+
+  //main loop
+  while (true) {
+    poller.poll(-1);
+  }
 
   return EXIT_SUCCESS;
 }

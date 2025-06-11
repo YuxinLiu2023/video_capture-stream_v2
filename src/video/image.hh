@@ -50,6 +50,9 @@ public:
   void copy_u_from(const std::string_view src);
   void copy_v_from(const std::string_view src);
 
+  // Copy image data from the shared ring buffer
+  void copy_from_ringbuffer(const uint8_t* src, size_t size);
+
   // forbid copy and move operators
   RawImage(const RawImage & other) = delete;
   const RawImage & operator=(const RawImage & other) = delete;
