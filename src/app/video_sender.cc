@@ -189,9 +189,6 @@ int main(int argc, char * argv[])
   // set UDP socket to non-blocking now
   udp_sock.set_blocking(false);
 
-  // // open the video file
-  // YUV4MPEG video_input(y4m_path, width, height);
-
   // allocate a raw image
   RawImage raw_img(width, height);
 
@@ -230,16 +227,7 @@ int main(int argc, char * argv[])
         // Read frame from ring buffer
         pthread_mutex_lock(&frame_ring_mutex);
         while (!frame_ring[frame_ring_tail].ready) {
-          // pthread_cond_wait(&frame_available, &frame_ring_mutex);
-
-          timespec ts;
-          clock_gettime(CLOCK_REALTIME, &ts);
-          ts.tv_sec += 0.5;  // timeout in 0.5 second
-
-          int ret = pthread_cond_timedwait(&frame_available, &frame_ring_mutex, &ts);
-          if (ret == ETIMEDOUT) {
-            cerr << "[MAIN] Wait timed out! Possibly missed signal." << endl;
-          }
+          pthread_cond_wait(&frame_available, &frame_ring_mutex);
         }
 
         pthread_mutex_lock(&frame_ring[frame_ring_tail].lock);
