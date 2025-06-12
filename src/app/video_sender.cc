@@ -214,30 +214,43 @@ int main(int argc, char * argv[])
      << "s " << frame_interval.tv_nsec << "ns" << endl;
 
   // read a raw frame when the periodic timer fires
-  poller.register_event(fps_timer, Poller::In,
-    [&]()
-    {
+  poller.register_event(fps_timer, Poller::In,[&]() {
       // being lenient: read raw frames 'num_exp' times and use the last one
       const auto num_exp = fps_timer.read_expirations();
       if (num_exp > 1) {
         cerr << "Warning: skipping " << num_exp - 1 << " raw frames" << endl;
       }
 
-      for (unsigned int i = 0; i < num_exp; i++) {
-        // Read frame from ring buffer
-        pthread_mutex_lock(&frame_ring_mutex);
-        while (!frame_ring[frame_ring_tail].ready) {
-          pthread_cond_wait(&frame_available, &frame_ring_mutex);
-        }
+      // for (unsigned int i = 0; i < num_exp; i++) {
+      //   // Read frame from ring buffer
+      //   pthread_mutex_lock(&frame_ring_mutex);
+      //   while (!frame_ring[frame_ring_tail].ready) {
+      //     pthread_cond_wait(&frame_available, &frame_ring_mutex);
+      //   }
 
-        pthread_mutex_lock(&frame_ring[frame_ring_tail].lock);
-        raw_img.copy_from_ringbuffer(frame_ring[frame_ring_tail].data, frame_ring[frame_ring_tail].size);
-        frame_ring[frame_ring_tail].ready = false;
-        pthread_mutex_unlock(&frame_ring[frame_ring_tail].lock);
+      //   pthread_mutex_lock(&frame_ring[frame_ring_tail].lock);
+      //   raw_img.copy_from_ringbuffer(frame_ring[frame_ring_tail].data, frame_ring[frame_ring_tail].size);
+      //   frame_ring[frame_ring_tail].ready = false;
+      //   pthread_mutex_unlock(&frame_ring[frame_ring_tail].lock);
 
-        frame_ring_tail = (frame_ring_tail + 1) % FRAME_RING_SIZE;
-        pthread_mutex_unlock(&frame_ring_mutex);
+      //   frame_ring_tail = (frame_ring_tail + 1) % FRAME_RING_SIZE;
+      //   pthread_mutex_unlock(&frame_ring_mutex);
+      // }
+
+      // Read frame from ring buffer
+      pthread_mutex_lock(&frame_ring_mutex);
+      while (!frame_ring[frame_ring_tail].ready) {
+        pthread_cond_wait(&frame_available, &frame_ring_mutex);
       }
+
+      pthread_mutex_lock(&frame_ring[frame_ring_tail].lock);
+      raw_img.copy_from_ringbuffer(frame_ring[frame_ring_tail].data, frame_ring[frame_ring_tail].size);
+      frame_ring[frame_ring_tail].ready = false;
+      pthread_mutex_unlock(&frame_ring[frame_ring_tail].lock);
+
+      frame_ring_tail = (frame_ring_tail + 1) % FRAME_RING_SIZE;
+      pthread_mutex_unlock(&frame_ring_mutex);
+
       cerr << "Read raw frame from ring buffer: index=" << frame_ring_tail << endl;
 
       // // compress 'raw_img' into frame 'frame_id' and packetize it
@@ -344,7 +357,7 @@ int main(int argc, char * argv[])
   //main loop
   while (keep_running) {
     cerr << "[POLL] calling poller..." << endl;
-    poller.poll(1);
+    poller.poll(-1);
   }
 
   return EXIT_SUCCESS;
