@@ -362,7 +362,7 @@ void *capture_streaming_loop(void *arg) {
       frame_ring_head = (frame_ring_head + 1) % FRAME_RING_SIZE;
       pthread_cond_signal(&frame_available);
 
-      cerr << "Stored frame in ring buffer at index: " << frame_ring_head << endl;
+      // cerr << "Stored frame in ring buffer at index: " << frame_ring_head << endl;
     }
     pthread_mutex_unlock(&frame_ring_mutex);
 
