@@ -230,16 +230,23 @@ int main(int argc, char * argv[])
         // Read frame from ring buffer
         pthread_mutex_lock(&frame_ring_mutex);
         while (!frame_ring[frame_ring_tail].ready) {
-          pthread_cond_wait(&frame_available, &frame_ring_mutex);
+          // pthread_cond_wait(&frame_available, &frame_ring_mutex);
+
+          timespec ts;
+          clock_gettime(CLOCK_REALTIME, &ts);
+          ts.tv_sec += 0.5;  // timeout in 0.5 second
+
+          int ret = pthread_cond_timedwait(&frame_available, &frame_ring_mutex, &ts);
+          if (ret == ETIMEDOUT) {
+            cerr << "[MAIN] Wait timed out! Possibly missed signal." << endl;
+          }
         }
-        pthread_mutex_unlock(&frame_ring_mutex);
 
         pthread_mutex_lock(&frame_ring[frame_ring_tail].lock);
         raw_img.copy_from_ringbuffer(frame_ring[frame_ring_tail].data, frame_ring[frame_ring_tail].size);
         frame_ring[frame_ring_tail].ready = false;
         pthread_mutex_unlock(&frame_ring[frame_ring_tail].lock);
 
-        pthread_mutex_lock(&frame_ring_mutex);
         frame_ring_tail = (frame_ring_tail + 1) % FRAME_RING_SIZE;
         pthread_mutex_unlock(&frame_ring_mutex);
       }

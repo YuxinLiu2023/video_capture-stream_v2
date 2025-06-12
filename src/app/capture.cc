@@ -351,20 +351,21 @@ void *capture_streaming_loop(void *arg) {
         out_planes, ff_out_linesize
     );
 
-    pthread_mutex_lock(&frame_ring[frame_ring_head].lock);
+    pthread_mutex_lock(&frame_ring_mutex);
     if (!frame_ring[frame_ring_head].ready) {
+      pthread_mutex_lock(&frame_ring[frame_ring_head].lock);
       memcpy(frame_ring[frame_ring_head].data, ff_out_data, yuv_frame_size);
       frame_ring[frame_ring_head].size = yuv_frame_size;
       frame_ring[frame_ring_head].ready = true;
 
-      pthread_mutex_lock(&frame_ring_mutex);
+      pthread_mutex_unlock(&frame_ring[frame_ring_head].lock);
       frame_ring_head = (frame_ring_head + 1) % FRAME_RING_SIZE;
       pthread_cond_signal(&frame_available);
       pthread_mutex_unlock(&frame_ring_mutex);
 
       cerr << "Stored frame in ring buffer at index: " << frame_ring_head << endl;
     }
-    pthread_mutex_unlock(&frame_ring[frame_ring_head].lock);
+    pthread_mutex_lock(&frame_ring_mutex);
 
     ioctl(fd, VIDIOC_QBUF, &buf);
   }
