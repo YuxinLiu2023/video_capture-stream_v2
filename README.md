@@ -19,6 +19,8 @@ Update the sender side, bridge the capture and stream parts, make them two threa
 ```bash
 // after code update
 // under video_capture-stream_v2/
+./autogen.sh
+./configure
 make clean
 make -j
 ```
@@ -36,6 +38,31 @@ Then, run the receiver side under `src/app/` with command
 ```bash
 ./video_receiver [sender ip] [port] --cbr [target bitrate] --lazy 1
 ```
+
+## Parameter setting
+### Sender side
+FPS choices = {120, 60, 50, 20, 14, 3}
+
+| Width | Height | FPS   | Remark |
+|-------|--------|-------|--------|
+| 1280  | 720    | ≤ 120 | 720P   |
+| 1920  | 1080   | ≤ 60  | 1080P  |
+| 2000  | 1500   | ≤ 50  | 2K     |
+| 3840  | 2160   | ≤ 20  | 4K     |
+| 4000  | 3000   | ≤ 14  | 4:3 4K |
+| 8000  | 6000   | ≤ 3   | 8K     |
+
+### Receiver side
+| Width | Height | FPS | Bitrate possible range |
+|-------|--------|-----|------------------------|
+| 1280  | 720    | 60  | 4–8 Mbps               |
+| 1280  | 720    | 120 | 6–12 Mbps              |
+| 1920  | 1080   | 50  | 5–10 Mbps              |
+| 1920  | 1080   | 60  | 6–12 Mbps              |
+| 2000  | 1500   | 50  | 8–14 Mbps              |
+| 3840  | 2160   | 20  | 12–24 Mbps             |
+| 4000  | 3000   | 14  | 12–24 Mbps             |
+| 8000  | 6000   | 3   | 20–40 Mbps             |
 
 ## Display process
 
