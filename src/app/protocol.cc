@@ -96,15 +96,15 @@ shared_ptr<Msg> Msg::parse_from_string(const string & binary)
   }
 }
 
-AckMsg::AckMsg(const Datagram & datagram)
+AckMsg::AckMsg(const Datagram & datagram, uint8_t carry_info, uint32_t actual_bitrate)
   : Msg(Type::ACK), frame_id(datagram.frame_id), frag_id(datagram.frag_id),
-    send_ts(datagram.send_ts)
+    send_ts(datagram.send_ts), carry_info(carry_info), actual_bitrate(actual_bitrate)
 {}
 
 size_t AckMsg::serialized_size() const
 {
   return Msg::serialized_size() + sizeof(uint16_t) + sizeof(uint32_t)
-         + sizeof(uint64_t);
+         + sizeof(uint64_t) + sizeof(uint8_t) + sizeof(uint32_t);
 }
 
 string AckMsg::serialize_to_string() const
@@ -116,6 +116,8 @@ string AckMsg::serialize_to_string() const
   binary += put_number(frame_id);
   binary += put_number(frag_id);
   binary += put_number(send_ts);
+  binary += put_number(carry_info);
+  binary += put_number(actual_bitrate);
 
   return binary;
 }

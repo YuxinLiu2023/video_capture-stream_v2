@@ -94,6 +94,14 @@ public:
   // accessors
   uint32_t next_frame() const { return next_frame_; }
 
+  std::optional<uint32_t> get_lastest_bitrate() const { return lastest_bitrate_; }
+  std::optional<uint32_t> get_pending_bitrate() 
+  {
+    auto val = pending_bitrate_;
+    pending_bitrate_.reset();
+    return val;
+  }
+
   // mutators
   void set_verbose(const bool verbose) { verbose_ = verbose; }
 
@@ -125,6 +133,8 @@ private:
   unsigned int num_decodable_frames_ {0};
   size_t total_decodable_frame_size_ {0}; // bytes
   std::chrono::time_point<std::chrono::steady_clock> last_stats_time_ {};
+  std::optional<uint32_t> lastest_bitrate_ {}; // kbps
+  std::optional<uint32_t> pending_bitrate_ {}; // kbps
 
   // shared between main (Decoder) and worker threads
   std::mutex mtx_ {};

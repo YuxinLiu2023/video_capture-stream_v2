@@ -212,9 +212,15 @@ void Decoder::consume_next_frame()
     const double diff_ms = duration<double, milli>(
                            stats_now - last_stats_time_).count();
     if (diff_ms > 0) {
+      const uint32_t actual_bitrate = static_cast<uint32_t>(total_decodable_frame_size_ * 8 * 100 / diff_ms);
+      lastest_bitrate_ = actual_bitrate;
+      pending_bitrate_ = lastest_bitrate_;
       cerr << "  - Bitrate (kbps): "
            << double_to_string(total_decodable_frame_size_ * 8 / diff_ms)
            << endl;
+    }else{
+      lastest_bitrate_.reset();
+      pending_bitrate_.reset();
     }
 
     // reset stats
@@ -449,12 +455,12 @@ void Decoder::worker_main()
       // worker thread also outputs stats roughly every second
       const auto stats_now = steady_clock::now();
       while (stats_now >= last_stats_time + 1s) {
-        if (num_decoded_frames > 0) {
-          cerr << "[worker] Avg/Max decoding time (ms) of "
-               << num_decoded_frames << " frames: "
-               << double_to_string(total_decode_time_ms / num_decoded_frames)
-               << "/" << double_to_string(max_decode_time_ms) << endl;
-        }
+        // if (num_decoded_frames > 0) {
+        //   cerr << "[worker] Avg/Max decoding time (ms) of "
+        //        << num_decoded_frames << " frames: "
+        //        << double_to_string(total_decode_time_ms / num_decoded_frames)
+        //        << "/" << double_to_string(max_decode_time_ms) << endl;
+        // }
 
         // reset stats
         num_decoded_frames = 0;

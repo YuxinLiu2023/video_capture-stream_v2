@@ -75,11 +75,16 @@ struct AckMsg : Msg
 {
   // construct an AckMsg
   AckMsg() : Msg(Type::ACK) {}
-  AckMsg(const Datagram & datagram);
+  // AckMsg(const Datagram & datagram);
+  AckMsg(const Datagram & datagram, uint8_t carry_info=0, uint32_t actual_bitrate=0);
 
   uint32_t frame_id {}; // frame ID
   uint16_t frag_id {};  // fragment ID in this frame
   uint64_t send_ts {};  // timestamp (us) on sender when the datagram was sent
+
+  // transmit calculated bitrate back to sender
+  uint8_t carry_info {0};
+  uint32_t actual_bitrate {0};
 
   size_t serialized_size() const override;
   std::string serialize_to_string() const override;

@@ -183,8 +183,16 @@ int main(int argc, char * argv[])
       throw runtime_error("failed to parse a datagram");
     }
 
+    uint8_t carry_info = 0;
+    uint32_t actual_bitrate = 0;
+    if (auto bitrate_ready = decoder.get_pending_bitrate()){
+      carry_info = 1;
+      actual_bitrate = *bitrate_ready;
+    }
+
     // send an ACK back to sender
-    AckMsg ack(datagram);
+    // AckMsg ack(datagram);
+    AckMsg ack(datagram, carry_info, actual_bitrate);
     udp_sock.send(ack.serialize_to_string());
 
     if (verbose) {

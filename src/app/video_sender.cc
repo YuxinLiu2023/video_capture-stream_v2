@@ -309,6 +309,11 @@ int main(int argc, char * argv[])
                << " frag_id=" << ack->frag_id << endl;
         }
 
+        if (ack->carry_info == 1){
+          cerr << "[Feedback] Bitrate feedback (kbps): " << static_cast<double>(ack->actual_bitrate)/100.0 << endl;
+          // encoder.set_target_bitrate(ack->actual_bitrate);
+        }
+
         // RTT estimation, retransmission, etc.
         encoder.handle_ack(ack);
 
