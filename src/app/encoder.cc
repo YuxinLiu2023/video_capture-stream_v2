@@ -258,6 +258,11 @@ void Encoder::handle_ack(const shared_ptr<AckMsg> & ack)
 {
   const auto curr_ts = timestamp_us();
 
+  // Feedback from receiver can request RTT sample reset
+  if (ack->carry_info == 1) {
+    reset_rtt_sample_buffer_ = true;
+  }
+
   // observed an RTT sample
   add_rtt_sample(curr_ts - ack->send_ts);
 
@@ -297,6 +302,12 @@ void Encoder::handle_ack(const shared_ptr<AckMsg> & ack)
 
 void Encoder::add_rtt_sample(const unsigned int rtt_us)
 {
+  if (reset_rtt_sample_array_) {
+    rtt_sample_array_.clear();
+    reset_rtt_sample_array_ = false;
+  }
+  rtt_sample_array_.push_back(rtt_us);
+
   // min RTT
   if (not min_rtt_us_ or rtt_us < *min_rtt_us_) {
     min_rtt_us_ = rtt_us;

@@ -10,6 +10,7 @@ extern "C" {
 #include <map>
 #include <memory>
 #include <optional>
+#include <vector>
 
 #include "exception.hh"
 #include "image.hh"
@@ -85,6 +86,8 @@ private:
   std::optional<unsigned int> min_rtt_us_ {};
   std::optional<double> ewma_rtt_us_ {};
   static constexpr double ALPHA = 0.2;
+  std::vector<unsigned int> rtt_sample_array_ {}; // collected RTT samples
+  bool reset_rtt_sample_array_ {false};           // flag to clear RTT samples on feedback
 
   // performance stats
   unsigned int num_encoded_frames_ {0};
