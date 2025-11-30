@@ -81,6 +81,8 @@ shared_ptr<Msg> Msg::parse_from_string(const string & binary)
     ret->frame_id = parser.read_uint32();
     ret->frag_id = parser.read_uint16();
     ret->send_ts = parser.read_uint64();
+    ret->carry_info = parser.read_uint8();
+    ret->actual_bitrate = parser.read_uint32();
     return ret;
   }
   else if (type == Type::CONFIG) {
