@@ -53,7 +53,7 @@ FPS choices = {120, 60, 50, 20, 14, 3}
 | 8000  | 6000   | ≤ 3   | 8K     |
 
 ### Receiver side
-| Width | Height | FPS | Bitrate possible range |
+| Width | Height | FPS | Possible bitrate range |
 |-------|--------|-----|------------------------|
 | 1280  | 720    | 60  | 4–8 Mbps               |
 | 1280  | 720    | 120 | 6–12 Mbps              |
