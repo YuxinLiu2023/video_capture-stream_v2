@@ -1,18 +1,18 @@
 # Pipeline Version 1
 
-Sender side: Jetson board, Ringmaster
+Sender side: the Jetson board, Our video capturing-streaming-storage platform.
 
-Receiver side: the server
+Receiver side: the server.
 
-## Description
+## Updates
 
-Now the capture and stream parts are separated.
+On the sender side, the capture and stream parts are separated.
 
 # Pipeline Version 2
 
 ## Description
 
-Update the sender side, bridge the capture and stream parts, make them two thread.
+On the sender side, bridge the capture and stream parts, make them two thread.
 
 ## Compile process
 
@@ -37,6 +37,9 @@ Then, run the receiver side under `src/app/` with command
 
 ```bash
 ./video_receiver [sender ip] [port] --cbr [target bitrate] --lazy 1
+// [sender ip] can be checked via "ifconfig" command on the sender side.
+// [port] should be set to the same value on the both side.
+// [lazy] is set for decoding and display.
 ```
 
 ## Parameter setting
@@ -52,8 +55,10 @@ FPS choices = {120, 60, 50, 20, 14, 3}
 | 4000  | 3000   | ≤ 14  | 4:3 4K |
 | 8000  | 6000   | ≤ 3   | 8K     |
 
+The parameters are limited by V4L2.
+
 ### Receiver side
-| Width | Height | FPS | Possible bitrate range |
+| Width | Height | FPS | Bitrate possible range |
 |-------|--------|-----|------------------------|
 | 1280  | 720    | 60  | 4–8 Mbps               |
 | 1280  | 720    | 120 | 6–12 Mbps              |
@@ -66,4 +71,13 @@ FPS choices = {120, 60, 50, 20, 14, 3}
 
 ## Display process
 
-The raw y4m video file will be saved on the receiver side `src/app/data/` after the transmission. To display the video, use `ffmpeg` and `ffplay`.
+The raw y4m video file will be saved on the receiver side `src/app/data/` after the transmission. To display the video, use `ffmpeg` and `ffplay`. For example:
+
+```bash
+ffmpeg -i output_raw.y4m -c:v libx264 -preset fast -crf 23 output.mp4
+ffplay output.mp4
+```
+
+# Pipeline Version 3
+
+## Description
