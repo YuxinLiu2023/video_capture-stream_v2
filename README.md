@@ -1,49 +1,50 @@
 # Pipeline Version 1
+## Platform Structure
 
-Sender side: the Jetson board, Our video capturing-streaming-storage platform.
+Sender side: Jetson board running our real-time video capture–encoding–streaming–storage platform.
 
-Receiver side: the server.
+Receiver side: Server receiving and storing the streamed video.
 
 ## Updates
 
-On the sender side, the capture and stream parts are separated.
+[x] Separated the capture and streaming components on the sender side.
 
 # Pipeline Version 2
+## Updates
 
-## Description
+[x] Integrated the capture and streaming components on the sender side and implemented them as two separate threads.
 
-On the sender side, bridge the capture and stream parts, make them two thread.
-
-## Compile process
+## Compilation Process
 
 ```bash
-// after code update
-// under video_capture-stream_v2/
+# After updating the code
+# Under video_capture-stream_v2/
 ./autogen.sh
 ./configure
 make clean
 make -j
 ```
 
-## Running process
+## Running Process
 
-First, run the sender side under `src/app/` with command
+First, run the sender side under `src/app/` with command:
 
 ```bash
 ./video_sender [port] -w [width] -h [height] -r [fps]
 ```
 
-Then, run the receiver side under `src/app/` with command
+Then, run the receiver side under `src/app/` with command:
 
 ```bash
 ./video_receiver [sender ip] [port] --cbr [target bitrate] --lazy 1
-// [sender ip] can be checked via "ifconfig" command on the sender side.
-// [port] should be set to the same value on the both side.
-// [lazy] is set for decoding and display.
 ```
+Notes:
+- `[sender_ip]` can be obtained using `ifconfig` on the sender.
+- `[port]` must match on both sender and receiver.
+- `--lazy` enables decoding and display optimizations.
 
-## Parameter setting
-### Sender side
+## Parameter Settings
+### Sender Side (V4L2-limited)
 FPS choices = {120, 60, 50, 20, 14, 3}
 
 | Width | Height | FPS   | Remark |
@@ -55,10 +56,8 @@ FPS choices = {120, 60, 50, 20, 14, 3}
 | 4000  | 3000   | ≤ 14  | 4:3 4K |
 | 8000  | 6000   | ≤ 3   | 8K     |
 
-The parameters are limited by V4L2.
-
-### Receiver side
-| Width | Height | FPS | Bitrate possible range |
+### Receiver Side (Practical Bitrate Ranges)
+| Width | Height | FPS | Bitrate Range |
 |-------|--------|-----|------------------------|
 | 1280  | 720    | 60  | 4–8 Mbps               |
 | 1280  | 720    | 120 | 6–12 Mbps              |
@@ -69,9 +68,9 @@ The parameters are limited by V4L2.
 | 4000  | 3000   | 14  | 12–24 Mbps             |
 | 8000  | 6000   | 3   | 20–40 Mbps             |
 
-## Display process
+## Display Process
 
-The raw y4m video file will be saved on the receiver side `src/app/data/` after the transmission. To display the video, use `ffmpeg` and `ffplay`. For example:
+The raw Y4M video file is saved on the receiver side under `src/app/data/`. To convert and display the video, use `ffmpeg` and `ffplay`. For example:
 
 ```bash
 ffmpeg -i output_raw.y4m -c:v libx264 -preset fast -crf 23 output.mp4
@@ -79,5 +78,13 @@ ffplay output.mp4
 ```
 
 # Pipeline Version 3
+## Updates (Planned)
+[ ] Integrate an ACK-based adaptive bitrate algorithm; design bitrate adaptation strategy based on actual throughput and RTT.
+[ ] Extend the platform to support multi-threaded encoding.
+[ ] Add support for direct storage without decoding on the receiver side.
 
-## Description
+# Comparison with Ringmaster
+- Ringmaster only supports video streaming, whereas our platform additionally enables real-time video capture from cameras, along with integrated encoding and streaming.
+- Our platform supports separate threads for video capture and encoding, and we will further extend it to support multi-threaded encoding.
+- An ACK-based adaptive bitrate (ABR) algorithm is implemented in our platform.
+- Our platform will be further extended to support GPU-based encoding.
