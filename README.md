@@ -7,12 +7,12 @@ Receiver side: Server receiving and storing the streamed video.
 
 ## Updates
 
-[x] Separated the capture and streaming components on the sender side.
+- [x] Separated the capture and streaming components on the sender side.
 
 # Pipeline Version 2
 ## Updates
 
-[x] Integrated the capture and streaming components on the sender side and implemented them as two separate threads.
+- [x] Integrated the capture and streaming components on the sender side and implemented them as two separate threads.
 
 ## Compilation Process
 
@@ -79,9 +79,9 @@ ffplay output.mp4
 
 # Pipeline Version 3
 ## Updates (Planned)
-[ ] Integrate an ACK-based adaptive bitrate algorithm; design bitrate adaptation strategy based on actual throughput and RTT.
-[ ] Extend the platform to support multi-threaded encoding.
-[ ] Add support for direct storage without decoding on the receiver side.
+- [ ] Integrate an ACK-based adaptive bitrate algorithm; design bitrate adaptation strategy based on actual throughput and RTT.
+- [ ] Extend the platform to support multi-threaded encoding.
+- [ ] Add support for direct storage without decoding on the receiver side.
 
 # Comparison with Ringmaster
 - Ringmaster only supports video streaming, whereas our platform additionally enables real-time video capture from cameras, along with integrated encoding and streaming.
